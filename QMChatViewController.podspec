@@ -84,6 +84,7 @@ Pod::Spec.new do |s|
     }
     s.resource = 'QMChatViewController/**/*.xcassets'
     s.requires_arc = true
+    s.dependency "QuickBlox", '2.16'
     s.dependency "TTTAttributedLabel"
     s.dependency "SDWebImage"
     s.dependency "FFCircularProgressView"
