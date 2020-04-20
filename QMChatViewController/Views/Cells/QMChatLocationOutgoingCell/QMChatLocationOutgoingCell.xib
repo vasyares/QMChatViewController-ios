@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="12120" systemVersion="16D32" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="13771" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES">
     <device id="retina4_7" orientation="portrait">
         <adaptation id="fullscreen"/>
     </device>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="12088"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="13772"/>
+        <capability name="Aspect ratio constraints" minToolsVersion="5.1"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <objects>
@@ -55,7 +56,7 @@
                                         <nil key="highlightedColor"/>
                                     </label>
                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="16:44" textAlignment="right" lineBreakMode="wordWrap" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="35y-FC-UxN" customClass="TTTAttributedLabel">
-                                        <rect key="frame" x="0.0" y="154" width="165" height="21"/>
+                                        <rect key="frame" x="0.0" y="154" width="147" height="21"/>
                                         <color key="backgroundColor" red="0.0" green="1" blue="0.50196081400000003" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                         <constraints>
                                             <constraint firstAttribute="height" constant="21" id="mVx-dl-W2y"/>
@@ -64,15 +65,24 @@
                                         <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                         <nil key="highlightedColor"/>
                                     </label>
+                                    <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="qGN-9A-f4X">
+                                        <rect key="frame" x="150" y="157" width="15" height="15"/>
+                                        <constraints>
+                                            <constraint firstAttribute="width" secondItem="qGN-9A-f4X" secondAttribute="height" multiplier="1:1" id="BIz-Gf-RnR"/>
+                                            <constraint firstAttribute="width" constant="15" id="SNl-AR-d8Z"/>
+                                        </constraints>
+                                    </imageView>
                                 </subviews>
                                 <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                 <constraints>
                                     <constraint firstItem="diF-ca-yd3" firstAttribute="leading" secondItem="aUM-zm-5ky" secondAttribute="leading" id="2GS-ez-PaZ"/>
                                     <constraint firstItem="diF-ca-yd3" firstAttribute="top" secondItem="aUM-zm-5ky" secondAttribute="top" id="2YG-PH-oBY"/>
-                                    <constraint firstAttribute="trailing" secondItem="35y-FC-UxN" secondAttribute="trailing" id="AoC-SQ-Y4a"/>
+                                    <constraint firstItem="qGN-9A-f4X" firstAttribute="trailing" secondItem="v1t-qy-7VR" secondAttribute="trailing" id="HlU-jw-14b"/>
                                     <constraint firstItem="35y-FC-UxN" firstAttribute="top" secondItem="v1t-qy-7VR" secondAttribute="bottom" id="NuX-bQ-Nnj"/>
                                     <constraint firstAttribute="trailing" secondItem="v1t-qy-7VR" secondAttribute="trailing" id="QjY-TS-GTP"/>
                                     <constraint firstItem="35y-FC-UxN" firstAttribute="leading" secondItem="aUM-zm-5ky" secondAttribute="leading" id="Xda-1O-jom"/>
+                                    <constraint firstItem="qGN-9A-f4X" firstAttribute="centerY" secondItem="35y-FC-UxN" secondAttribute="centerY" id="bT5-bB-HEW"/>
+                                    <constraint firstItem="qGN-9A-f4X" firstAttribute="leading" secondItem="35y-FC-UxN" secondAttribute="trailing" constant="3" id="c4T-13-sRV"/>
                                     <constraint firstAttribute="bottom" secondItem="35y-FC-UxN" secondAttribute="bottom" id="qjn-WF-jgP"/>
                                     <constraint firstAttribute="trailing" secondItem="diF-ca-yd3" secondAttribute="trailing" id="sf6-RH-gfz"/>
                                     <constraint firstItem="v1t-qy-7VR" firstAttribute="leading" secondItem="aUM-zm-5ky" secondAttribute="leading" id="vdA-gK-ogS"/>
@@ -116,6 +126,7 @@
             </constraints>
             <size key="customSize" width="253" height="183"/>
             <connections>
+                <outlet property="ImageMsgDelivery" destination="qGN-9A-f4X" id="Z8d-Eb-Hb8"/>
                 <outlet property="avatarContainerViewHeightConstraint" destination="spf-dw-DvB" id="Snn-K2-i2s"/>
                 <outlet property="avatarContainerViewWidthConstraint" destination="Z8f-dc-CD6" id="uNG-mW-JjU"/>
                 <outlet property="avatarView" destination="TG7-Nv-KYM" id="Bfb-PV-nOu"/>

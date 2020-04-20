@@ -18,16 +18,21 @@
 
 static NSMutableSet *_qmChatCellMenuActions = nil;
 
+
+
 @interface QMChatCell() <QMImageViewDelegate, UIGestureRecognizerDelegate>
 
 @property (weak, nonatomic) IBOutlet QMChatContainerView *containerView;
 @property (weak, nonatomic) IBOutlet UIView *messageContainer;
 
 @property (weak, nonatomic) IBOutlet QMImageView *avatarView;
+@property (weak, nonatomic) IBOutlet UIImageView *ImageMsgDelivery;
 
 @property (weak, nonatomic) IBOutlet TTTAttributedLabel *textView;
 @property (weak, nonatomic) IBOutlet TTTAttributedLabel *topLabel;
 @property (weak, nonatomic) IBOutlet TTTAttributedLabel *bottomLabel;
+@property (weak, nonatomic) IBOutlet TTTAttributedLabel *destructLabel;
+
 
 @property (weak, nonatomic) IBOutlet NSLayoutConstraint *containerWidthConstraint;
 
@@ -41,14 +46,21 @@ static NSMutableSet *_qmChatCellMenuActions = nil;
 
 @property (weak, nonatomic) IBOutlet NSLayoutConstraint *topLabelHeightConstraint;
 @property (weak, nonatomic) IBOutlet NSLayoutConstraint *bottomLabelHeightConstraint;
+@property (weak, nonatomic) IBOutlet NSLayoutConstraint *destructLabelHeightConstraint;
+
 @property (weak, nonatomic) IBOutlet NSLayoutConstraint *textViewBottomLabelVerticalSpaceConstraint;
 @property (weak, nonatomic) IBOutlet NSLayoutConstraint *topLabelTextViewVerticalSpaceConstraint;
 
 @property (weak, nonatomic, readwrite) UITapGestureRecognizer *tapGestureRecognizer;
 
+
+
 @end
 
 @implementation QMChatCell
+
+
+
 
 //MARK: - Class methods
 + (void)initialize {
@@ -57,6 +69,7 @@ static NSMutableSet *_qmChatCellMenuActions = nil;
     dispatch_once(&onceToken, ^{
         _qmChatCellMenuActions = [NSMutableSet new];
     });
+    
 }
 
 + (void)registerForReuseInView:(id)dataView {
@@ -66,6 +79,7 @@ static NSMutableSet *_qmChatCellMenuActions = nil;
     
     UINib *nib = [self nib];
     NSParameterAssert(nib);
+    
     
     if ([dataView isKindOfClass:[UITableView class]]) {
         
@@ -81,6 +95,7 @@ static NSMutableSet *_qmChatCellMenuActions = nil;
 }
 
 + (UINib *)nib {
+    
     
     return [QMChatResources nibWithNibName:NSStringFromClass([self class])];
 }
@@ -112,6 +127,7 @@ static NSMutableSet *_qmChatCellMenuActions = nil;
     
     _topLabelHeightConstraint.constant = 0;
     _bottomLabelHeightConstraint.constant = 0;
+    _destructLabelHeightConstraint.constant = 0;
     
     _topLabelTextViewVerticalSpaceConstraint.constant = 0;
     _textViewBottomLabelVerticalSpaceConstraint.constant = 0;
@@ -124,8 +140,9 @@ static NSMutableSet *_qmChatCellMenuActions = nil;
     self.bottomLabel.backgroundColor = [UIColor clearColor];
     self.containerView.backgroundColor = [UIColor clearColor];
     self.avatarView.backgroundColor = [UIColor clearColor];
-#endif
     
+#endif
+
     [self.layer setDrawsAsynchronously:YES];
     
     self.avatarView.imageViewType = QMImageViewTypeCircle;
@@ -135,6 +152,9 @@ static NSMutableSet *_qmChatCellMenuActions = nil;
     tap.delegate = self;
     [self addGestureRecognizer:tap];
     self.tapGestureRecognizer = tap;
+    
+    _arrMutableTime = [[NSMutableArray alloc] init];
+    _arrMutableMsgid = [[NSMutableArray alloc] init];
 }
 
 - (UICollectionViewLayoutAttributes *)preferredLayoutAttributesFittingAttributes:(UICollectionViewLayoutAttributes *)layoutAttributes {
@@ -157,7 +177,10 @@ static NSMutableSet *_qmChatCellMenuActions = nil;
     [self updateConstraint:self.bottomLabelHeightConstraint
               withConstant:customAttributes.bottomLabelHeight];
     
-    [self updateConstraint:self.messageContainerTopInsetConstraint
+    [self updateConstraint:self.destructLabelHeightConstraint
+           withConstant:customAttributes.destructLabelHeight];
+    
+   [self updateConstraint:self.messageContainerTopInsetConstraint
               withConstant:customAttributes.containerInsets.top];
     
     [self updateConstraint:self.messageContainerLeftInsetConstraint
@@ -178,8 +201,8 @@ static NSMutableSet *_qmChatCellMenuActions = nil;
     [self updateConstraint:self.containerWidthConstraint
               withConstant:customAttributes.containerSize.width];
     
-    [self layoutIfNeeded];
     
+    [self layoutIfNeeded];
 }
 
 - (void)updateConstraint:(NSLayoutConstraint *)constraint withConstant:(CGFloat)constant {
@@ -188,6 +211,7 @@ static NSMutableSet *_qmChatCellMenuActions = nil;
         return;
     }
     
+    //NSLog(@"ConstraintCell:%f",constant);
     constraint.constant = constant;
 }
 
@@ -206,9 +230,7 @@ static NSMutableSet *_qmChatCellMenuActions = nil;
     self.containerView.highlighted = selected;
 }
 
-
 //MARK: - Menu actions
-
 - (BOOL)respondsToSelector:(SEL)aSelector {
     
     if ([_qmChatCellMenuActions containsObject:NSStringFromSelector(aSelector)]) {
@@ -230,16 +252,14 @@ static NSMutableSet *_qmChatCellMenuActions = nil;
             [self.delegate chatCell:self didPerformAction:anInvocation.selector withSender:sender];
         }
     }
+    
     else {
-        
         [super forwardInvocation:anInvocation];
     }
 }
 
 - (NSMethodSignature *)methodSignatureForSelector:(SEL)aSelector {
-    
     if ([_qmChatCellMenuActions containsObject:NSStringFromSelector(aSelector)]) {
-        
         return [NSMethodSignature signatureWithObjCTypes:"v@:@"];
     }
     
@@ -249,26 +269,23 @@ static NSMutableSet *_qmChatCellMenuActions = nil;
 //MARK: - Gesture recognizers
 
 - (void)imageViewDidTap:(QMImageView *)imageView {
-    
     [self.delegate chatCellDidTapAvatar:self];
 }
 
 - (void)handleTapGesture:(UITapGestureRecognizer *)tap {
-    
+
     CGPoint touchPt = [tap locationInView:self];
     UIView *touchView = [tap.view hitTest:touchPt withEvent:nil];
-    
+
     if ([touchView isKindOfClass:[TTTAttributedLabel class]]) {
-        
+
         TTTAttributedLabel *label = (TTTAttributedLabel *)touchView;
         CGPoint translatedPoint = [label convertPoint:touchPt fromView:tap.view];
-        
+
         TTTAttributedLabelLink *labelLink = [label linkAtPoint:translatedPoint];
-        
+
         if (labelLink.result.numberOfRanges > 0) {
-            
             if ([self.delegate respondsToSelector:@selector(chatCell:didTapOnTextCheckingResult:)]) {
-                
                 [self.delegate chatCell:self didTapOnTextCheckingResult:labelLink.result];
             }
             
@@ -276,12 +293,10 @@ static NSMutableSet *_qmChatCellMenuActions = nil;
         }
     }
     
-    if (CGRectContainsPoint(self.containerView.frame, touchPt)) {
-        
+    if (CGRectContainsPoint(self.containerView.frame, touchPt)){
         [self.delegate chatCellDidTapContainer:self];
     }
-    else if ([self.delegate respondsToSelector:@selector(chatCell:didTapAtPosition:)]) {
-        
+    else if ([self.delegate respondsToSelector:@selector(chatCell:didTapAtPosition:)]){
         [self.delegate chatCell:self didTapAtPosition:touchPt];
     }
 }
@@ -290,30 +305,27 @@ static NSMutableSet *_qmChatCellMenuActions = nil;
     
     CGPoint touchPt = [touch locationInView:gestureRecognizer.view];
     
-    if ([gestureRecognizer isKindOfClass:[UILongPressGestureRecognizer class]]) {
+    if ([gestureRecognizer isKindOfClass:[UILongPressGestureRecognizer class]]){
         
         if ([touch.view isKindOfClass:[TTTAttributedLabel class]]) {
             
             TTTAttributedLabel *label = (TTTAttributedLabel *)touch.view;
             CGPoint translatedPoint = [label convertPoint:touchPt fromView:gestureRecognizer.view];
             
-            
             TTTAttributedLabelLink *labelLink = [label linkAtPoint:translatedPoint];
             
             if (labelLink.result.numberOfRanges > 0) {
-                
                 return NO;
             }
         }
-        
+
         return CGRectContainsPoint(self.containerView.frame, touchPt);
     }
-    
+
     return YES;
 }
 
 //MARK: - Layout model
-
 + (QMChatCellLayoutModel)layoutModel {
     
     QMChatCellLayoutModel defaultLayoutModel = {
@@ -322,7 +334,8 @@ static NSMutableSet *_qmChatCellMenuActions = nil;
         .containerInsets = UIEdgeInsetsMake(4, 0, 4, 5),
         .containerSize = CGSizeZero,
         .topLabelHeight = 17,
-        .bottomLabelHeight = 14,
+        .bottomLabelHeight = 100,   //    14,
+        .destructLabelHeight = 80,
         .maxWidthMarginSpace = 20,
         .maxWidth = 0
     };
@@ -330,4 +343,163 @@ static NSMutableSet *_qmChatCellMenuActions = nil;
     return defaultLayoutModel;
 }
 
+- (void)startTimerDeleteMessage:(QBChatMessage *)message:(int )pendingTime {
+    
+    _intseconds = pendingTime;
+    
+    [_timer invalidate];
+    
+    _timer = [NSTimer scheduledTimerWithTimeInterval:1.0
+                                              target:self
+                                            selector:@selector(handleTimer:)
+                                            userInfo:message repeats:YES];
+    
+    [[NSRunLoop currentRunLoop] addTimer:_timer forMode:NSRunLoopCommonModes];
+    
+    [_timer fire];
+
+}
+
+
+
+- (void)handleTimer:(NSTimer*)theTimer {
+    // NSLog (@"Got the message: %@", (QBChatMessage*)[theTimer userInfo]);
+    
+    QBChatMessage *Msgobject = (QBChatMessage*)[theTimer userInfo];
+    _intseconds--;
+    
+    if (_intseconds >= 0){
+       /*
+        NSString *strTime  = [NSString stringWithFormat:@"%li",(long)_intseconds];
+        NSString * JoinStr = [_updateBottomTime stringByAppendingString:@"\n\n"];
+        NSString * strdestructTime = [@"Destruct in:" stringByAppendingString:strTime];
+        NSString * JoinStrTime = [JoinStr stringByAppendingString:strdestructTime];
+        self.bottomLabel.text = @"";
+        self.bottomLabel.text  = JoinStrTime;
+        */
+        
+        
+        // NSInteger seconds = _intseconds/1000;
+        // NSInteger hours = seconds/(60*60);
+        
+        // (totalSeconds % 3600) / 60
+        
+        NSInteger  minutes = (_intseconds % 3600) / 60;
+        NSInteger secondsRemain = _intseconds % 60;
+        
+        NSString *strMinues  = [NSString stringWithFormat:@"%li",(long)minutes];
+        NSString *strSeconds  = [NSString stringWithFormat:@"%li",(long)secondsRemain];
+        NSString * StrTotalTime = [strMinues stringByAppendingString:@":"];
+        NSString * StrFnlTime;
+        
+        if (minutes != nil && minutes != 0) {
+            StrFnlTime = [StrTotalTime stringByAppendingString:strSeconds];
+        }else{
+            StrFnlTime = strSeconds;
+        }
+        
+        //   NSString *strTime  = [NSString stringWithFormat:@"%li",(long)_intseconds];
+        
+        NSString * JoinStr = [_updateBottomTime stringByAppendingString:@"\n\n"];
+        
+        //NSString * strdestructTime = [@"Destruct in:" stringByAppendingString:strTime];
+        
+        NSString * strdestructTime = [@"Destruct in:" stringByAppendingString:StrFnlTime];
+        
+        //NSString * strdestructTime = [@"D:" stringByAppendingString:StrFnlTime];
+        
+        NSString * JoinStrTime = [JoinStr stringByAppendingString:strdestructTime];
+        
+        self.bottomLabel.text = @"";
+        
+        self.bottomLabel.text  = JoinStrTime;
+        
+    }else{
+        
+        [_timer invalidate];
+        _dicValue = [[NSMutableDictionary alloc] init];
+        [_dicValue setObject:Msgobject  forKey:@"DeleteMsg"];
+        [[NSNotificationCenter defaultCenter]
+         postNotificationName:@"TestNotification"
+         object:nil userInfo:_dicValue];
+    }
+}
+
+
+/*
+
+- (void)handleTimer:(NSTimer*)theTimer {
+    
+   // NSLog (@"Got the message: %@", (QBChatMessage*)[theTimer userInfo]);
+    
+    QBChatMessage *Msgobject = (QBChatMessage*)[theTimer userInfo];
+    
+    _intseconds--;
+    
+    if (_intseconds >= 0){
+        
+       // NSInteger seconds = _intseconds/1000;
+      // NSInteger hours = seconds/(60*60);
+        
+       // (totalSeconds % 3600) / 60
+        
+        NSInteger  minutes = (_intseconds % 3600) / 60;
+        
+        NSInteger secondsRemain = _intseconds % 60;
+        
+        
+        NSString *strMinues  = [NSString stringWithFormat:@"%li",(long)minutes];
+        
+        NSString *strSeconds  = [NSString stringWithFormat:@"%li",(long)secondsRemain];
+        
+        NSString * StrTotalTime = [strMinues stringByAppendingString:@":"];
+        
+        NSString * StrFnlTime;
+        
+        
+        if (minutes != nil && minutes != 0) {
+            StrFnlTime = [StrTotalTime stringByAppendingString:strSeconds];
+        }else{
+            StrFnlTime = strSeconds;
+        }
+        
+     //   NSString *strTime  = [NSString stringWithFormat:@"%li",(long)_intseconds];
+        
+        NSString * JoinStr = [_updateBottomTime stringByAppendingString:@"\n\n"];
+        
+        //NSString * strdestructTime = [@"Destruct in:" stringByAppendingString:strTime];
+        
+        NSString * strdestructTime = [@"Destruct in:" stringByAppendingString:StrFnlTime];
+        
+        //NSString * strdestructTime = [@"D:" stringByAppendingString:StrFnlTime];
+        
+
+        NSString * JoinStrTime = [JoinStr stringByAppendingString:strdestructTime];
+        
+        self.bottomLabel.text = @"";
+        
+        self.bottomLabel.text  = JoinStrTime;
+        
+    }else{
+        
+        [_timer invalidate];
+        
+        _dicValue = [[NSMutableDictionary alloc] init];
+        [_dicValue setObject:Msgobject  forKey:@"DeleteMsg"];
+
+        [[NSNotificationCenter defaultCenter]
+         postNotificationName:@"TestNotification"
+         object:nil userInfo:_dicValue];
+    }
+    
+}
+ 
+ */
+
+
 @end
+
+
+
+
+

@@ -14,6 +14,7 @@
 
 @end
 
+
 @implementation QMChatAttachmentIncomingCell
 @synthesize attachmentID = _attachmentID;
 
@@ -48,5 +49,6 @@
     
     self.progressLabel.text = [NSString stringWithFormat:@"%2.0f %%", progress * 100.0f];
 }
+
 
 @end

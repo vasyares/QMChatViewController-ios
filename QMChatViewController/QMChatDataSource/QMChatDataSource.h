@@ -38,7 +38,13 @@ typedef NS_ENUM(NSInteger, QMDataSourceActionType) {
  */
 @property (nonatomic, assign) NSTimeInterval customDividerInterval;
 
+@property (nonatomic, assign) NSString *MsgTagNumber;
+
+
 - (NSArray *)allMessages;
+
+//- (NSArray *)allMessagesTags;
+
 
 - (void)addMessage:(QBChatMessage *)message;
 - (void)addMessages:(NSArray<QBChatMessage *> *)messages;
@@ -57,6 +63,7 @@ typedef NS_ENUM(NSInteger, QMDataSourceActionType) {
  *  @return The number of messages in the data source
  */
 - (NSInteger)messagesCount;
+
 
 /**
  *  Message for index path.

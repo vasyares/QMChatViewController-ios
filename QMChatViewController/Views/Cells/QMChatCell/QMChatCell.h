@@ -11,6 +11,10 @@
 #import <TTTAttributedLabel/TTTAttributedLabel.h>
 #import "QMChatCellLayoutAttributes.h"
 #import "QMImageView.h"
+#import "QMChatCell.h"
+#import "QMChatCollectionView.h"
+#import "QBChatMessage+QBDateDivider.h"
+
 
 struct QMChatLayoutModel {
     
@@ -19,7 +23,8 @@ struct QMChatLayoutModel {
     UIEdgeInsets containerInsets;
     CGFloat topLabelHeight;
     CGFloat bottomLabelHeight;
-    CGSize staticContainerSize;
+    CGFloat destructLabelHeight;
+    CGSize  staticContainerSize;
     CGFloat spaceBetweenTopLabelAndTextView;
     CGFloat spaceBetweenTextViewAndBottomLabel;
     CGFloat maxWidthMarginSpace;
@@ -30,6 +35,10 @@ typedef struct QMChatLayoutModel QMChatCellLayoutModel;
 
 @class QMChatCell;
 @class QMImageView;
+
+//NSInteger a = 0;
+
+
 
 /**
  *  The `QMChatCellDelegate` protocol defines methods that allow you to manage
@@ -108,6 +117,7 @@ typedef struct QMChatLayoutModel QMChatCellLayoutModel;
  *  Doing so could result in unexpected behavior.
  */
 @property (weak, nonatomic, readonly) QMChatContainerView *containerView;
+
 @property (weak, nonatomic, readonly) UIView *messageContainer;
 
 /**
@@ -127,6 +137,8 @@ typedef struct QMChatLayoutModel QMChatCellLayoutModel;
  */
 @property (weak, nonatomic, readonly) QMImageView *avatarView;
 
+@property (weak, nonatomic, readonly) UIImageView  *ImageMsgDelivery; //kk
+
 /**
  *  Returns chat message attributed label.
  *
@@ -145,6 +157,25 @@ typedef struct QMChatLayoutModel QMChatCellLayoutModel;
  */
 @property (weak, nonatomic, readonly) TTTAttributedLabel *topLabel;
 
+//@property (nonatomic) BOOL checkCount;
+@property(nonatomic) NSInteger intcount;
+
+//@property (strong,atomic) NSInteger intcount=0;
+@property (nonatomic) int intseconds;
+@property (strong, nonatomic) NSTimer  *timer;
+@property (strong, nonatomic) NSString  *updateBottomTime; //kk _dicValue
+@property (strong, nonatomic) NSMutableDictionary  *dicValue;
+@property (strong, nonatomic) NSMutableDictionary  *dicDataBaseValue;
+@property (strong, nonatomic) NSMutableArray  *arrMutableTime;
+@property (strong, nonatomic) NSMutableArray  *arrMutableMsgid;
+
+//@property (strong, nonatomic) NSUserDefaults  *userDefaults;
+
+//@property (strong, nonatomic) QBChatMessage  *msgPPItem;
+//- (void) startTimer:(NSDictionary *)destTime;    //:(NSDate *) endTime;
+
+- (void)startTimerDeleteMessage:(QBChatMessage *)message:(int )pendingTime;
+
 /**
  *  Returns bottom chat message attributed label.
  *
@@ -152,7 +183,9 @@ typedef struct QMChatLayoutModel QMChatCellLayoutModel;
  *  its frame, nor should you remove this view from the cell or remove any of its subviews.
  *  Doing so could result in unexpected behavior.
  */
-@property (weak, nonatomic, readonly) TTTAttributedLabel *bottomLabel;
+@property (weak, nonatomic, readonly) TTTAttributedLabel *bottomLabel;        // destructLabel
+
+@property (weak, nonatomic, readonly) TTTAttributedLabel *destructLabel;
 
 /**
  *  Returns the underlying gesture recognizer for tap gestures in the avatarContainerView of the cell.
@@ -200,6 +233,7 @@ typedef struct QMChatLayoutModel QMChatCellLayoutModel;
  *  @return QMChatCellLayoutModel struct
  */
 + (QMChatCellLayoutModel)layoutModel;
+
 
 /**
  Registers cell for data view

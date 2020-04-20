@@ -15,6 +15,9 @@
 @property (assign, nonatomic) CGSize avatarSize;
 @property (assign, nonatomic) CGFloat topLabelHeight;
 @property (assign, nonatomic) CGFloat bottomLabelHeight;
+
+@property (assign, nonatomic) CGFloat destructLabelHeight;
+
 @property (assign, nonatomic) CGFloat spaceBetweenTopLabelAndTextView;
 @property (assign, nonatomic) CGFloat spaceBetweenTextViewAndBottomLabel;
 

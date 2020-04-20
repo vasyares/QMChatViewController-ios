@@ -199,6 +199,7 @@
     }
 
     QMChatCellLayoutModel layoutModel =
+   
     [self.chatCollectionView.delegate collectionView:self.chatCollectionView
                      layoutModelAtIndexPath:indexPath];
     
@@ -230,6 +231,7 @@
         CGFloat finalWidth = dynamicSize.width + horizontalContainerInsets;
         
         CGFloat cellHeight = dynamicSize.height + verticalContainerInsets + additionalSpace;
+        
         CGFloat finalCellHeight = MAX(cellHeight, layoutModel.avatarSize.height);
         
         CGFloat minWidth = [self.chatCollectionView.delegate collectionView:self.chatCollectionView

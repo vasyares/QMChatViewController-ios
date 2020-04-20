@@ -20,6 +20,11 @@
 #import "QMKVOView.h"
 #import "QMMediaViewDelegate.h"
 #import "QMAudioRecordButton.h"
+#import "QMChatDataSource.h"
+
+
+
+
 
 static void * kChatKeyValueObservingContext = &kChatKeyValueObservingContext;
 
@@ -29,18 +34,18 @@ const NSUInteger kQMSystemInputToolbarDebugHeight = 0;
 UINavigationControllerDelegate, UIActionSheetDelegate, UIScrollViewDelegate, UIAlertViewDelegate,
 QMChatDataSourceDelegate, QMAudioRecordToolbarDelegate>
 
+
 @property (weak, nonatomic) IBOutlet QMChatCollectionView *collectionView;
 @property (weak, nonatomic) IBOutlet QMInputToolbar *inputToolbar;
 
 @property (weak, nonatomic) IBOutlet NSLayoutConstraint *toolbarHeightConstraint;
 @property (weak, nonatomic) IBOutlet NSLayoutConstraint *toolbarBottomLayoutGuide;
-
 @property (strong, nonatomic, readonly) UIImagePickerController *pickerController;
-
 @property (strong, nonatomic) NSIndexPath *selectedIndexPathForMenu;
 
 //Keyboard observing
 @property (strong, nonatomic) QMKVOView *systemInputToolbar;
+
 
 @end
 
@@ -51,7 +56,6 @@ QMChatDataSourceDelegate, QMAudioRecordToolbarDelegate>
 #pragma mark - Initialization
 
 + (UINib *)nib {
-    
     return [QMChatResources nibWithNibName:NSStringFromClass([QMChatViewController class])];
 }
 
@@ -78,6 +82,8 @@ QMChatDataSourceDelegate, QMAudioRecordToolbarDelegate>
     
     [super viewDidLoad];
     
+  _myDictionary = [[NSMutableDictionary alloc] init];
+
     [self configureMessagesViewController];
     [self configureProgressView];
     
@@ -93,27 +99,32 @@ QMChatDataSourceDelegate, QMAudioRecordToolbarDelegate>
     self.systemInputToolbar.frame = CGRectMake(0, 0, 0, kQMSystemInputToolbarDebugHeight);
     self.systemInputToolbar.hostViewFrameChangeBlock = ^(UIView *view, BOOL animated) {
         
-       CGFloat pos = weakSelf.view.frame.size.height - [view.superview convertPoint:view.frame.origin toView:weakSelf.view].y;
-
+        CGFloat pos = weakSelf.view.frame.size.height - [view.superview convertPoint:view.frame.origin toView:weakSelf.view].y;
+        
         if (weakSelf.inputToolbar.contentView.textView.isFirstResponder) {
             
             if (view.superview.frame.origin.y > 0 && pos == 0) {
                 return;
             }
         }
-
+        
         const CGFloat v = [weakSelf inputToolBarStartPos];
-
+        
         if (pos < v || !view) {
             pos = v;
         }
-
+        
         [weakSelf setToolbarBottomConstraintValue:pos animated:animated];
     };
     
     self.inputToolbar.contentView.textView.inputAccessoryView = self.systemInputToolbar;
     
     self.edgesForExtendedLayout = UIRectEdgeNone;
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(receiveTestNotification:)
+                                                 name:@"TestNotification"
+                                               object:nil];
 }
 
 - (void)viewWillAppear:(BOOL)animated {
@@ -137,6 +148,37 @@ QMChatDataSourceDelegate, QMAudioRecordToolbarDelegate>
     [super didReceiveMemoryWarning];
     NSLog(@"MEMORY WARNING: %s", __PRETTY_FUNCTION__);
 }
+
+- (void) receiveTestNotification:(NSNotification *) notification{
+    
+    if ([[notification name] isEqualToString:@"TestNotification"])
+        NSLog (@"Successfully received the test notification!");
+    
+    NSDictionary* userInfo = notification.userInfo;
+   // NSNumber* total = (NSNumber*)userInfo[@"total"];
+    NSLog (@"Successfully received test notification! %@", userInfo);
+    
+    QBChatMessage *message = [userInfo valueForKey:@"DeleteMsg"];
+    
+     [self deleteFromServer:message];
+}
+
+-(void) deleteFromServer:(QBChatMessage *)ChatMsg{
+    
+    NSSet *mesagesIDs = [NSSet setWithObjects:ChatMsg.ID, nil];
+    
+    [QBRequest deleteMessagesWithIDs:mesagesIDs forAllUsers:NO successBlock:^(QBResponse *response) {
+         NSLog(@"response:%@",response);
+        
+        [self.chatDataSource deleteMessage:ChatMsg];
+        [self deleteMesaageItemLocally:ChatMsg];
+        
+    } errorBlock:^(QBResponse *response) {
+         NSLog(@"responseError:%@",response);
+        
+    }];
+}
+
 
 - (void)configureProgressView {
     
@@ -222,7 +264,6 @@ QMChatDataSourceDelegate, QMAudioRecordToolbarDelegate>
     [QMChatOutgoingLinkPreviewCell registerForReuseInView:self.collectionView];
 }
 
-
 #pragma mark - Getters
 
 - (UIImagePickerController *)pickerController
@@ -254,18 +295,18 @@ QMChatDataSourceDelegate, QMAudioRecordToolbarDelegate>
         }
         
         switch (updateType) {
-            
+                
             case QMDataSourceActionTypeAdd:
-            [self.collectionView insertItemsAtIndexPaths:indexPaths];
-            break;
-            
+                [self.collectionView insertItemsAtIndexPaths:indexPaths];
+                break;
+                
             case QMDataSourceActionTypeUpdate:
-            [self.collectionView reloadItemsAtIndexPaths:indexPaths];
-            break;
-            
+                [self.collectionView reloadItemsAtIndexPaths:indexPaths];
+                break;
+                
             case QMDataSourceActionTypeRemove:
-            [self.collectionView deleteItemsAtIndexPaths:indexPaths];
-            break;
+                [self.collectionView deleteItemsAtIndexPaths:indexPaths];
+                break;
         }
     };
     
@@ -282,7 +323,7 @@ QMChatDataSourceDelegate, QMAudioRecordToolbarDelegate>
 #pragma mark - View lifecycle
 
 - (NSUInteger)inputToolBarStartPos {
-
+    
     return 0;
 }
 
@@ -309,9 +350,9 @@ QMChatDataSourceDelegate, QMAudioRecordToolbarDelegate>
 
 - (UIButton *)sendButtonItem {
     
-    NSString *sendTitle = NSLocalizedString(@"Send", nil);
+     NSString *sendTitle = NSLocalizedString(@"Send", nil);
     
-    UIButton *sendButton = [[UIButton alloc] initWithFrame:CGRectZero];
+     UIButton *sendButton = [[UIButton alloc] initWithFrame:CGRectZero];
     [sendButton setTitle:sendTitle forState:UIControlStateNormal];
     [sendButton setTitleColor:[UIColor blueColor] forState:UIControlStateNormal];
     [sendButton setTitleColor:[[UIColor blueColor] colorByDarkeningColorWithValue:0.1f] forState:UIControlStateHighlighted];
@@ -437,7 +478,6 @@ QMChatDataSourceDelegate, QMAudioRecordToolbarDelegate>
     [self presentViewController:alertController animated:YES completion:NULL];
 }
 
-
 - (void)didPickAttachmentImage:(UIImage *)image {
     NSAssert(NO, @"Error! required method not implemented in subclass. Need to implement %s", __PRETTY_FUNCTION__);
 }
@@ -466,12 +506,10 @@ QMChatDataSourceDelegate, QMAudioRecordToolbarDelegate>
 }
 
 - (void)finishReceivingMessage {
-    
     [self finishReceivingMessageAnimated:YES];
 }
 
 - (void)finishReceivingMessageAnimated:(BOOL)animated {
-    
     if (self.automaticallyScrollsToMostRecentMessage && ![self isMenuVisible]) {
         [self scrollToBottomAnimated:animated];
     }
@@ -502,23 +540,33 @@ QMChatDataSourceDelegate, QMAudioRecordToolbarDelegate>
 
 - (NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section {
     
+   // NSLog(@"%@", [self.chatDataSource MsgTagNumber]);
+    
     return [self.chatDataSource messagesCount];
+    
 }
 
 - (UICollectionViewCell *)collectionView:(QMChatCollectionView *)collectionView
                   cellForItemAtIndexPath:(NSIndexPath *)indexPath {
     
-    QBChatMessage *messageItem =
-    [self.chatDataSource messageForIndexPath:indexPath];
+    QBChatMessage *messageItem = [self.chatDataSource messageForIndexPath:indexPath];
+  
+   // _messageItem = [self.chatDataSource messageForIndexPath:indexPath];
     
     Class class = [self viewClassForItem:messageItem];
     NSString *itemIdentifier = [class cellReuseIdentifier];
+    
     
     QMChatCell *cell =
     [collectionView dequeueReusableCellWithReuseIdentifier:itemIdentifier
                                               forIndexPath:indexPath];
     
-    [self collectionView:collectionView configureCell:cell forIndexPath:indexPath];
+    
+    if (![messageItem.text  isEqual: @"DataTagging"]) {
+        [self collectionView:collectionView configureCell:cell forIndexPath:indexPath];
+        
+         return cell;
+    }
     
     return cell;
 }
@@ -535,9 +583,10 @@ QMChatDataSourceDelegate, QMAudioRecordToolbarDelegate>
     
     QBChatMessage *messageItem = [self.chatDataSource messageForIndexPath:indexPath];
     
-    if ([cell isKindOfClass:[QMChatNotificationCell class]]) {
-        
+    if ([cell isKindOfClass:[QMChatNotificationCell class]]) { //kk
         [(QMChatNotificationCell *)cell notificationLabel].attributedText = [self attributedStringForItem:messageItem];
+        
+        
         return;
     }
     
@@ -552,11 +601,142 @@ QMChatDataSourceDelegate, QMAudioRecordToolbarDelegate>
             chatCell.textView.enabledTextCheckingTypes = self.enableTextCheckingTypes;
         }
         
-        chatCell.topLabel.text = [self topLabelAttributedStringForItem:messageItem];
-        chatCell.textView.text = [self attributedStringForItem:messageItem];
-        chatCell.bottomLabel.text = [self bottomLabelAttributedStringForItem:messageItem];
+        
+        /*
+        
+        NSDictionary *customDic = [messageItem valueForKey:@"customParameters"];
+        NSString *strDesTime = [customDic valueForKey:@"DestructTime"];
+        NSString *strGroupNew = [customDic valueForKey:@"groupMember"];
+       
+        if (![messageItem.text  isEqual: @"DataTagging"]) {
+            
+            if  (![messageItem.text  isEqual: @"Message"]){
+            
+        NSLog(@"DataTaggingPPPPPP: %@",messageItem.text);
+        
+       // chatCell.topLabel.text = [self topLabelAttributedStringForItem:messageItem];
+            
+        NSLog(@"chatCell.topLabel.text: %@",chatCell.topLabel.text);
+            
+     //  chatCell.textView.text = [self attributedStringForItem:messageItem];
+            
+        chatCell.textView.attributedText = [self attributedStringForItem:messageItem];
+            
+        // chatCell.bottomLabel.attributedText = [self bottomLabelAttributedStringForItem:messageItem];
+        
+        NSAttributedString *strBottom = [self bottomLabelAttributedStringForItem:messageItem];
+        
+      //  chatCell.bottomLabel.text = strBottom;
+        
+         NSString *bottomTime = [[NSString alloc] initWithString: [strBottom string]];
+        //NSLog(@"text length bottom  %lu",(unsigned long)text.length);
+        
+        NSString *mySmallerString = [bottomTime substringWithRange:NSMakeRange(0, 5)];
+         
+        chatCell.updateBottomTime = @"";
+         
+                if (![strGroupNew  isEqual: @"abc"]){
+                    chatCell.bottomLabel.text = mySmallerString;
+                    chatCell.textView.textColor = UIColor.whiteColor;
+                    
+                }else{
+                    chatCell.bottomLabel.text = @"";
+                }
+            
+        // NSLog(@"MessageItemCell: %@",messageItem.ID);
+                
+                
+        chatCell.ImageMsgDelivery.backgroundColor = [UIColor clearColor]; //18:23Sent
+            
+        if ([cell isKindOfClass:[QMChatOutgoingCell class]]){
+            
+            if (![strGroupNew  isEqual: @"abc"]){
+                
+                NSArray *arrReadId = [messageItem valueForKey:@"readIDs"];
+                NSArray *arrDeliveredID = [messageItem valueForKey:@"deliveredIDs"];
+                
+                if ([arrReadId count] == 1 &&  [arrDeliveredID count] > 1)  {
+                    chatCell.ImageMsgDelivery.image = [UIImage imageNamed:@"icon_delivered"];
+                }
+                if ([arrReadId count] > 1){
+                    chatCell.ImageMsgDelivery.image = [UIImage imageNamed:@"icon_seen"];
+                    
+                    if ([strDesTime length] == 0) {
+         
+                    }else {
+                        chatCell.updateBottomTime = mySmallerString;
+                        [chatCell startTimerDeleteMessage:messageItem];
+                    }
+                }
+         
+                if ([arrReadId count] == 1 &&  [arrDeliveredID count] == 1)  {
+                    chatCell.ImageMsgDelivery.image = [UIImage imageNamed:@"icon_sent"];
+                }
+            }
+        }
+        
+        if ([cell isKindOfClass:[QMChatIncomingCell class]]){
+         
+            if (![strGroupNew  isEqual: @"abc"]){
+                
+                if ([strDesTime length] == 0) {
+                } else {
+                    chatCell.updateBottomTime = mySmallerString;
+                    [chatCell startTimerDeleteMessage:messageItem];
+                }
+            }
+         
+        }
+        
+        if ([cell isKindOfClass:[QMChatAttachmentOutgoingCell class]]){
+            
+            NSArray *arrReadId = [messageItem valueForKey:@"readIDs"];
+            NSArray *arrDeliveredID = [messageItem valueForKey:@"deliveredIDs"];
+            
+            if ([arrReadId count] == 1 &&  [arrDeliveredID count] > 1)  {
+                chatCell.ImageMsgDelivery.image = [UIImage imageNamed:@"icon_delivered"];
+            }
+            if ([arrReadId count] > 1){
+                chatCell.ImageMsgDelivery.image = [UIImage imageNamed:@"icon_seen"];
+                
+                if ([strDesTime length] == 0) {
+                } else {
+                    chatCell.updateBottomTime = mySmallerString;
+                    [chatCell startTimerDeleteMessage:messageItem];
+                }
+            }
+         
+            if ([arrReadId count] == 1 &&  [arrDeliveredID count] == 1)  {
+                chatCell.ImageMsgDelivery.image = [UIImage imageNamed:@"icon_sent"];
+            }
+        }
+        
+        if ([cell isKindOfClass:[QMChatAttachmentIncomingCell class]]){
+            
+            if ([strDesTime length] == 0) {
+            } else {
+                chatCell.updateBottomTime = mySmallerString;
+                [chatCell startTimerDeleteMessage:messageItem];
+            }
+         }
+         
+       }
+        
+        */
+
+      // }
+        
+        
+        
     }
+    
 }
+
+
+//-(void) setTagValue:(NSString *)strTagID{
+//
+//}
+
 
 - (NSAttributedString *)topLabelAttributedStringForItem:(QBChatMessage *)messageItem {
     NSAssert(NO, @"Have to be overridden in subclasses!");
@@ -565,11 +745,15 @@ QMChatDataSourceDelegate, QMAudioRecordToolbarDelegate>
 
 - (NSAttributedString *)attributedStringForItem:(QBChatMessage *)messageItem {
     NSAssert(NO, @"Have to be overridden in subclasses!");
+    
     return nil;
 }
 
 - (NSAttributedString *)bottomLabelAttributedStringForItem:(QBChatMessage *)messageItem {
     NSAssert(NO, @"Have to be overridden in subclasses!");
+    
+    NSLog(@"messageItem for bottom: %@",messageItem);
+    
     return nil;
 }
 
@@ -593,6 +777,7 @@ QMChatDataSourceDelegate, QMAudioRecordToolbarDelegate>
 
 - (Class)viewClassForItem:(QBChatMessage *)item {
     NSAssert(NO, @"Have to be overridden in subclasses.");
+    
     return nil;
 }
 
@@ -627,11 +812,9 @@ QMChatDataSourceDelegate, QMAudioRecordToolbarDelegate>
 - (void)messagesInputToolbar:(QMInputToolbar *)toolbar didPressLeftBarButton:(UIButton *)sender {
     
     if (toolbar.sendButtonOnRight) {
-        
         [self didPressAccessoryButton:sender];
     }
     else {
-        
         [self didPressSendButton:sender];
     }
 }
@@ -639,11 +822,9 @@ QMChatDataSourceDelegate, QMAudioRecordToolbarDelegate>
 - (void)messagesInputToolbar:(QMInputToolbar *)toolbar didPressRightBarButton:(UIButton *)sender {
     
     if (toolbar.sendButtonOnRight) {
-        
         [self didPressSendButton:sender];
     }
     else {
-        
         [self didPressAccessoryButton:sender];
     }
 }
@@ -723,15 +904,17 @@ QMChatDataSourceDelegate, QMAudioRecordToolbarDelegate>
 
 - (void)imagePickerController:(UIImagePickerController *)picker didFinishPickingMediaWithInfo:(NSDictionary *)info
 {
+    
     [picker dismissViewControllerAnimated:YES completion:NULL];
+    
     UIImage *image = info[UIImagePickerControllerOriginalImage];
     
     [self didPickAttachmentImage:image];
 }
 
 - (void)imagePickerControllerDidCancel:(UIImagePickerController *)picker {
-    
-    [picker dismissViewControllerAnimated:YES completion:NULL];
+     [picker dismissViewControllerAnimated:YES completion:NULL];
+   
 }
 
 #pragma mark - Notifications
@@ -775,6 +958,8 @@ QMChatDataSourceDelegate, QMAudioRecordToolbarDelegate>
 }
 
 #pragma mark - Input toolbar utilities
+
+//- (void)ShowCustomKeyboard:(BOOL)animated;
 
 - (void)setToolbarBottomConstraintValue:(CGFloat)constraintValue animated:(BOOL)animated {
     
@@ -950,10 +1135,10 @@ QMChatDataSourceDelegate, QMAudioRecordToolbarDelegate>
         switch (status)
         {
             case PHAuthorizationStatusAuthorized:
-            if (completion) {
-                completion(YES);
-            }
-            break;
+                if (completion) {
+                    completion(YES);
+                }
+                break;
             case PHAuthorizationStatusNotDetermined:
             {
                 [PHPhotoLibrary requestAuthorization:^(PHAuthorizationStatus authorizationStatus)
@@ -967,10 +1152,10 @@ QMChatDataSourceDelegate, QMAudioRecordToolbarDelegate>
                 break;
             }
             default:
-            if (completion) {
-                completion(NO);
-            }
-            break;
+                if (completion) {
+                    completion(NO);
+                }
+                break;
         }
     }
 }
@@ -1014,12 +1199,10 @@ QMChatDataSourceDelegate, QMAudioRecordToolbarDelegate>
 }
 
 - (void)traitCollectionDidChange:(UITraitCollection *)previousTraitCollection {
-    
     [super traitCollectionDidChange:previousTraitCollection];
 }
 
 - (BOOL)scrollIsAtTop {
-    
     return CGRectGetMaxY([self scrollVisibleRect]) >= CGRectGetMaxY([self scrollTopRect]);
 }
 
@@ -1053,6 +1236,14 @@ QMChatDataSourceDelegate, QMAudioRecordToolbarDelegate>
     else {
         hideKeyboardBlock();
     }
+    
+     [self setToolbarBottomConstraintValue:0.0 animated:true];
 }
+
+- (void)ShowCustomKeyboard:(BOOL)animated {
+    [self setToolbarBottomConstraintValue:250.0 animated:true];
+    
+}
+
 
 @end

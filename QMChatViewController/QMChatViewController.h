@@ -37,10 +37,36 @@
 #import "QMChatBaseLinkPreviewCell.h"
 #import "QMChatIncomingLinkPreviewCell.h"
 #import "QMChatOutgoingLinkPreviewCell.h"
+#import "QMChatDataSource.h"
+
+//#import "QMChatService.h"
+//#import "QMBaseService.h"
+//#import "QMServicesManager.h"
+
 
 NS_ASSUME_NONNULL_BEGIN
 
 @interface QMChatViewController : UIViewController <QMChatCollectionViewDataSource, QMChatCollectionViewDelegateFlowLayout, UITextViewDelegate>
+
+//@property (nonatomic) NSInteger intcount;
+//@property (nonatomic) NSInteger intseconds;
+//@property (strong, nonatomic) NSTimer  *timer;
+//@property (strong, nonatomic) NSString  *updateTime;
+
+
+//@property (strong, nonatomic) QBChatMessage *messageItem;
+//@property (strong, nonatomic, readonly) QMServicesManager *ServiceObj;
+
+
+@property (strong, nonatomic) NSMutableDictionary  *myDictionary;
+
+
+//NSMutableDictionary myDictionary = [[NSMutableDictionary alloc] init];
+
+//NSMutableDictionary *myDictionary = [[NSMutableDictionary alloc] init];
+
+//@property (strong, nonatomic) QMChatService *object;
+
 
 @property (strong, nonatomic) QMChatDataSource *chatDataSource;
 /**
@@ -59,6 +85,11 @@ NS_ASSUME_NONNULL_BEGIN
  *  This view controller is the toolbar's delegate.
  */
 @property (weak, nonatomic, readonly) QMInputToolbar *inputToolbar;
+
+
+//@property (weak, nonatomic, readonly) QMInputToolbar *inputToolbar2;
+//@property (weak, nonatomic) IBOutlet NSLayoutConstraint *toolbarBottomLayoutGuide;
+//@property (weak, nonatomic) NSLayoutConstraint *toolbarBottomLayoutGuide;
 
 /**
  Progress view. Is hiden by default.
@@ -109,6 +140,18 @@ NS_ASSUME_NONNULL_BEGIN
  *
  *  @return Configured attributed string.
  */
+
+
+
+///-(void) setTagValue:(NSString *)strTagID; //(kk)
+
+
+- (void) deleteMesaageItemLocally:(QBChatMessage *)messageItem;  //kk
+
+
+- (void)ShowCustomKeyboard:(BOOL)animated;
+
+
 - (nullable NSAttributedString *)attributedStringForItem:(QBChatMessage *)messageItem;
 
 /**
@@ -127,7 +170,12 @@ NS_ASSUME_NONNULL_BEGIN
  *
  *  @return Configured attributed string.
  */
+
 - (nullable NSAttributedString *)bottomLabelAttributedStringForItem:(QBChatMessage *)messageItem;
+
+
+
+//- (nullable NSAttributedString *)destructLabelAttributedStringForItem:(QBChatMessage *)messageItem;
 
 /**
  *  Collection Cell View class for specific message. Have to be overriden in subclasses. Defaults cells are supplied with QMChatViewController.
@@ -270,6 +318,8 @@ NS_ASSUME_NONNULL_BEGIN
  */
 - (void)hideKeyboard:(BOOL)animated;
 
+
+
 /**
  Make the background layer to spin around its center. This should be called in the main thread.
  */
@@ -279,6 +329,10 @@ NS_ASSUME_NONNULL_BEGIN
  Stop the spinning of the background layer. This should be called in the main thread.
  */
 - (void)stopSpinProgress;
+
+
+
+
 
 #pragma mark - Methods requiring super
 

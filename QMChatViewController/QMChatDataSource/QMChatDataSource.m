@@ -13,6 +13,8 @@
 @interface QMChatDataSource()
 
 @property (strong, nonatomic) NSMutableArray *messages;
+@property (strong, nonatomic) NSMutableArray *messagesNew;
+
 @property (strong, nonatomic) NSMutableSet *dateDividers;
 @property (strong, nonatomic) dispatch_queue_t serialQueue;
 
@@ -55,6 +57,7 @@ NSComparator messageComparator = ^(QBChatMessage *obj1, QBChatMessage *obj2) {
         
         _dateDividers = [NSMutableSet set];
         _messages = [NSMutableArray array];
+        _messagesNew = [NSMutableArray array];
     }
     
     return self;
@@ -65,7 +68,6 @@ NSComparator messageComparator = ^(QBChatMessage *obj1, QBChatMessage *obj2) {
 }
 
 // MARK: - Adding
-
 - (void)addMessage:(QBChatMessage *)message {
     [self addMessages:@[message]];
 }
@@ -75,7 +77,6 @@ NSComparator messageComparator = ^(QBChatMessage *obj1, QBChatMessage *obj2) {
 }
 
 // MARK: - Removing
-
 - (void)deleteMessage:(QBChatMessage *)message {
     [self deleteMessages:@[message]];
 }
@@ -202,7 +203,17 @@ NSComparator messageComparator = ^(QBChatMessage *obj1, QBChatMessage *obj2) {
         
         if (updateType == QMDataSourceActionTypeAdd) {
             
-            [self insertMessage:msg];
+            // msg.customParameters
+            
+           /*
+            if (![msg.text  isEqual: @"DataTagging"]){ //kk
+                [self insertMessage:msg];
+            }else{
+                //[self insertMessageTag:msg];
+                
+            }*/
+            
+             [self insertMessage:msg];
         }
         else if (updateType == QMDataSourceActionTypeUpdate) {
             
@@ -213,11 +224,14 @@ NSComparator messageComparator = ^(QBChatMessage *obj1, QBChatMessage *obj2) {
             
             [self.messages removeObjectAtIndex:[self indexPathForMessage:msg].item];
         }
+        
     }
     
     if (updateType == QMDataSourceActionTypeAdd || updateType == QMDataSourceActionTypeUpdate) {
         
         indexPaths = [self indexPathsForMessages:messages];
+        
+        
     }
     
     return indexPaths;
@@ -231,29 +245,100 @@ NSComparator messageComparator = ^(QBChatMessage *obj1, QBChatMessage *obj2) {
         
         NSIndexPath *indexPath = [self indexPathForMessage:msg];
         if (indexPath) {
-            [indexPaths addObject:indexPath];
+            
+             [indexPaths addObject:indexPath];
+            
+//            if (![msg.text  isEqual: @"DataTagging"]){ //kk
+//               // [self insertMessage:msg];
+//            }
+            
+           // for (int i =0; i<indexPaths.count; i++) {
+                
+//                if (indexPath.row==0) {
+//
+//                    NSDictionary *customDic = [msg valueForKey:@"customParameters"];
+//
+//                    if ([msg.text  isEqual: @"DataTagging"]) {
+//
+//                        NSString *dataTag = [customDic valueForKey:@"MessageTag"];
+//
+//                        self.MsgTagNumber = dataTag;
+//
+//                        NSUserDefaults *defaultsMsgTagNumber = [NSUserDefaults standardUserDefaults];
+//
+//                        // saving an NSString
+//                        [defaultsMsgTagNumber setObject:self.MsgTagNumber  forKey:@"MsgTagNumber"];
+//                        [defaultsMsgTagNumber synchronize];
+//
+//                    }
+//                }
+            
+           // }
+            
+            
+            
+            
         }
     }
     
     return [NSArray arrayWithArray:indexPaths];
 }
 
+
+//----------------------customCode--------------------
+// text: DataTagging
+
+//- (void)insertMessageTag:(QBChatMessage *)message {
+//    NSUInteger index = [self indexThatConformsToMessage:message];
+//
+//    [self.messagesNew insertObject:message atIndex:index];
+//}
+
+//- (NSArray *)allMessagesTags {
+//    return [NSArray arrayWithArray:self.messagesNew];
+//}
+
+
+//----------------------customCode--------------------
+
 // MARK: - Helpers
 
 - (NSArray *)allMessages {
     
+//    _messagesNew = _messages;
+//
+//    _messages.removeAllObjects;
+//
+//    for (data in _messagesNew) {
+//        [_messages addObject:data];
+//
+//    }
+    
+   // printf("Messages:%@",_messages);
+    
+    
     return [NSArray arrayWithArray:_messages];
+    
+  //  return [NSArray arrayWithArray:_messages];
 }
 
 - (NSInteger)messagesCount {
-    
     return self.allMessages.count;
 }
+
 
 - (NSUInteger)insertMessage:(QBChatMessage *)message {
     
     NSUInteger index = [self indexThatConformsToMessage:message];
-    [self.messages insertObject:message atIndex:index];
+    
+    
+//    if (![message.text  isEqual: @"DataTagging"]){ //kk
+//       // [self insertMessage:msg];
+//    }else{
+//          [self.messages insertObject:message atIndex:index];
+//    }
+    
+   [self.messages insertObject:message atIndex:index];
     
     return index;
 }

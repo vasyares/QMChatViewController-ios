@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="13771" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="14109" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
     <device id="retina4_7" orientation="portrait">
         <adaptation id="fullscreen"/>
     </device>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="13772"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="14088"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
@@ -15,7 +15,8 @@
                 <outlet property="collectionView" destination="l9u-2b-4LK" id="bLP-6g-CkO"/>
                 <outlet property="inputToolbar" destination="BoD-Az-3DM" id="w74-g9-1qA"/>
                 <outlet property="progressView" destination="UfM-VL-Z3v" id="9mA-X5-7AZ"/>
-                <outlet property="toolbarBottomLayoutGuide" destination="rHs-6q-NX4" id="d6h-iu-VMX"/>
+                <outlet property="toolbarBottomLayoutGuide" destination="RT2-BI-PA0" id="AhC-HW-rjr"/>
+                <outlet property="toolbarHeightConstraint" destination="cHi-bm-zGY" id="QTp-74-SK4"/>
                 <outlet property="view" destination="mUa-cS-ru4" id="nki-T1-RTI"/>
             </connections>
         </placeholder>
@@ -24,39 +25,57 @@
             <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
             <subviews>
-                <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="UfM-VL-Z3v" customClass="FFCircularProgressView">
-                    <rect key="frame" x="172.5" y="306.5" width="30" height="30"/>
+                <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="9cQ-sz-jzf">
+                    <rect key="frame" x="0.0" y="20" width="375" height="647"/>
+                    <subviews>
+                        <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="UfM-VL-Z3v" customClass="FFCircularProgressView">
+                            <rect key="frame" x="172" y="308" width="30" height="30"/>
+                            <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                            <constraints>
+                                <constraint firstAttribute="height" constant="30" id="aKI-qg-Vg6"/>
+                                <constraint firstAttribute="width" constant="30" id="rVL-oS-6df"/>
+                            </constraints>
+                        </view>
+                        <collectionView opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" minimumZoomScale="0.0" maximumZoomScale="0.0" dataMode="none" translatesAutoresizingMaskIntoConstraints="NO" id="l9u-2b-4LK" customClass="QMChatCollectionView">
+                            <rect key="frame" x="0.0" y="55" width="375" height="487"/>
+                            <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                            <collectionViewLayout key="collectionViewLayout" id="dZl-7C-LHR" customClass="QMChatCollectionViewFlowLayout"/>
+                            <cells/>
+                            <connections>
+                                <outlet property="dataSource" destination="-1" id="6dx-AD-2A3"/>
+                                <outlet property="delegate" destination="-1" id="vQe-1q-iBa"/>
+                            </connections>
+                        </collectionView>
+                        <toolbar opaque="NO" clearsContextBeforeDrawing="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="BoD-Az-3DM" customClass="QMInputToolbar">
+                            <rect key="frame" x="0.0" y="542" width="375" height="100"/>
+                            <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                            <constraints>
+                                <constraint firstAttribute="height" constant="100" id="cHi-bm-zGY"/>
+                            </constraints>
+                            <items/>
+                            <color key="tintColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                        </toolbar>
+                    </subviews>
                     <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                     <constraints>
-                        <constraint firstAttribute="height" constant="30" id="aKI-qg-Vg6"/>
-                        <constraint firstAttribute="width" constant="30" id="rVL-oS-6df"/>
+                        <constraint firstItem="l9u-2b-4LK" firstAttribute="leading" secondItem="9cQ-sz-jzf" secondAttribute="leading" id="4St-2P-X4m"/>
+                        <constraint firstItem="l9u-2b-4LK" firstAttribute="top" secondItem="9cQ-sz-jzf" secondAttribute="top" constant="55" id="A0i-mx-pJF"/>
+                        <constraint firstAttribute="trailing" secondItem="l9u-2b-4LK" secondAttribute="trailing" id="Jvh-ma-Zqf"/>
+                        <constraint firstAttribute="bottom" secondItem="BoD-Az-3DM" secondAttribute="bottom" constant="5" id="RT2-BI-PA0"/>
+                        <constraint firstItem="BoD-Az-3DM" firstAttribute="top" secondItem="l9u-2b-4LK" secondAttribute="bottom" id="ZGP-d9-J8b"/>
+                        <constraint firstAttribute="trailing" secondItem="BoD-Az-3DM" secondAttribute="trailing" id="fVg-7R-Hlw"/>
+                        <constraint firstItem="UfM-VL-Z3v" firstAttribute="centerY" secondItem="9cQ-sz-jzf" secondAttribute="centerY" id="gLl-N4-2Me"/>
+                        <constraint firstItem="UfM-VL-Z3v" firstAttribute="centerX" secondItem="9cQ-sz-jzf" secondAttribute="centerX" id="hUG-b1-JCh"/>
+                        <constraint firstItem="BoD-Az-3DM" firstAttribute="leading" secondItem="9cQ-sz-jzf" secondAttribute="leading" id="xX3-vo-XsQ"/>
                     </constraints>
                 </view>
-                <collectionView opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" minimumZoomScale="0.0" maximumZoomScale="0.0" dataMode="prototypes" translatesAutoresizingMaskIntoConstraints="NO" id="l9u-2b-4LK" customClass="QMChatCollectionView">
-                    <rect key="frame" x="0.0" y="20" width="375" height="603"/>
-                    <color key="backgroundColor" red="0.0" green="0.0" blue="0.0" alpha="0.0" colorSpace="custom" customColorSpace="sRGB"/>
-                    <collectionViewLayout key="collectionViewLayout" id="dZl-7C-LHR" customClass="QMChatCollectionViewFlowLayout"/>
-                    <cells/>
-                    <connections>
-                        <outlet property="dataSource" destination="-1" id="6dx-AD-2A3"/>
-                        <outlet property="delegate" destination="-1" id="vQe-1q-iBa"/>
-                    </connections>
-                </collectionView>
-                <toolbar opaque="NO" clearsContextBeforeDrawing="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="BoD-Az-3DM" customClass="QMInputToolbar">
-                    <rect key="frame" x="0.0" y="623" width="375" height="44"/>
-                    <items/>
-                </toolbar>
             </subviews>
+            <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
             <constraints>
-                <constraint firstItem="UfM-VL-Z3v" firstAttribute="centerY" secondItem="l9u-2b-4LK" secondAttribute="centerY" id="5sQ-EP-lQi"/>
-                <constraint firstAttribute="trailing" secondItem="BoD-Az-3DM" secondAttribute="trailing" id="7xc-Ha-asg"/>
-                <constraint firstItem="l9u-2b-4LK" firstAttribute="leading" secondItem="eLW-iG-nSM" secondAttribute="leading" id="Ao9-tY-M3L"/>
-                <constraint firstItem="l9u-2b-4LK" firstAttribute="top" secondItem="eLW-iG-nSM" secondAttribute="top" id="GLO-Ke-B4Z"/>
-                <constraint firstItem="eLW-iG-nSM" firstAttribute="trailing" secondItem="l9u-2b-4LK" secondAttribute="trailing" id="Z1j-5K-vju"/>
-                <constraint firstItem="UfM-VL-Z3v" firstAttribute="centerX" secondItem="l9u-2b-4LK" secondAttribute="centerX" id="laO-XI-8tb"/>
-                <constraint firstItem="BoD-Az-3DM" firstAttribute="top" secondItem="l9u-2b-4LK" secondAttribute="bottom" id="qcK-jo-Y2N"/>
-                <constraint firstAttribute="bottom" secondItem="BoD-Az-3DM" secondAttribute="bottom" id="rHs-6q-NX4"/>
-                <constraint firstItem="BoD-Az-3DM" firstAttribute="leading" secondItem="mUa-cS-ru4" secondAttribute="leading" id="ts7-8f-0lH"/>
+                <constraint firstItem="eLW-iG-nSM" firstAttribute="bottom" secondItem="9cQ-sz-jzf" secondAttribute="bottom" id="BED-jA-Vgh"/>
+                <constraint firstItem="9cQ-sz-jzf" firstAttribute="top" secondItem="eLW-iG-nSM" secondAttribute="top" id="Noh-M5-N90"/>
+                <constraint firstItem="9cQ-sz-jzf" firstAttribute="leading" secondItem="eLW-iG-nSM" secondAttribute="leading" id="mYa-oX-zm8"/>
+                <constraint firstItem="eLW-iG-nSM" firstAttribute="trailing" secondItem="9cQ-sz-jzf" secondAttribute="trailing" id="vzL-zn-Wd9"/>
             </constraints>
             <nil key="simulatedStatusBarMetrics"/>
             <viewLayoutGuide key="safeArea" id="eLW-iG-nSM"/>

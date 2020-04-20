@@ -177,7 +177,7 @@ static NSMutableDictionary *_imaages = nil;
     if (_highlighted != highlighted) {
         _highlighted = highlighted;
         
-        _preview.alpha = highlighted ? 0.6 : 1;
+       // _preview.alpha = highlighted ? 0.6 : 1;
     }
 }
 
